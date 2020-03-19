@@ -49,6 +49,11 @@ case $key in
     shift
     shift
     ;;
+    --compress-gzip)
+    COMPRESS_GZIP=1
+    shift
+    shift
+    ;;
     -v|--version)
     version
     exit 0
@@ -103,8 +108,17 @@ fi
 # file
 FILE="${BASH_ARGV[0]}"
 if [ ! -f $FILE ]; then echo "Not exists or it is not regular file: $FILE" >&2; exit 1; fi
-RAW_NAME=$(basename $FILE)
 
-echo "Upload to $UPLOAD_PATH/$RAW_NAME"
+if [ "$COMPRESS_GZIP" = 1 ]; then
+    RAW_NAME=$(basename $FILE).gz
+else
+    RAW_NAME=$(basename $FILE)
+fi
 
-aws s3 cp $FILE $UPLOAD_PATH
+echo "Upload to $UPLOAD_PATH$RAW_NAME"
+
+if [ "$COMPRESS_GZIP" = 1 ]; then
+	gzip -c -9 $FILE | aws s3 cp - "$UPLOAD_PATH$RAW_NAME"
+else
+	aws s3 cp $FILE $UPLOAD_PATH
+fi
