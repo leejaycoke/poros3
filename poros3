@@ -11,6 +11,7 @@ Usage: $(basename $0) [options...] [--bucket S3_BUCKET] <file>
 -s, --service   service name (api, admin, web ...)
 -m, --module    module name (nginx, syslog, apache2 ...)
 -d, --date      (TODAY or YESTERDAY) default: TODAY
+--compress-gzip     compress by gzip
 
 optional arguments:
     -v, --version   show version

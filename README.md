@@ -27,28 +27,49 @@ The `{ip_adress}` is obtained from ec2 meta information (timeout:3s). If it fail
 
 ## Example
 
+### example 1. (command)
+
 ```bash
 $ poros3 --bucket mywebservice-logs \
     --service admin \
     --module nginx \
-    --date YESTERDAY \
+    --date TODAY \
     /var/log/nginx/access.log
 ```
 
+### example 2. (logrotate)
 
 ```bash
-$ poros3 --help
+/var/log/nginx/*.log {
+        daily
+        dateext
+        dateyesterday
+        missingok
+        ifempty
+        rotate 90
+        compress
+        create 644 nginx
+        sharedscripts
+        olddir /var/log/nginx/backup
+        postrotate
+            if [ -f /var/run/nginx.pid ]; then
+                kill -USR1 `cat /var/run/nginx.pid`
+            fi
+            poros3 --bucket mywebservice-logs --service admin --module nginx --date YESTERDAY --compress-gzip $1
+        endscript
 ```
 
 ### Help
 
 ```
-Usage: poros3 [options...] [--bucket S3_BUCKET] <file>
+$ poros3 --help
+Usage: $(basename $0) [options...] [--bucket S3_BUCKET] <file>
 
--b, --bucket    s3 bucket name
+-b, --bucket    s3 bucket name (mandantory)
 -s, --service   service name (api, admin, web ...)
 -m, --module    module name (nginx, syslog, apache2 ...)
 -d, --date      (TODAY or YESTERDAY) default: TODAY
+--compress-gzip     compress by gzip
 
 optional arguments:
     -v, --version   show version
