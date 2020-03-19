@@ -4,9 +4,9 @@ Upload log file after postrotate in logrotate.
 
 This script upload log file to s3.
 
-> S3 full path: `s3://{bucket}/{servic}/${module}/${date:yyyyMM}/${ip_adress}/filename`
+> S3 full path: `s3://{bucket}/{servic}/{module}/{date:yyyyMM}/{ip_adress}/filename`
 
-The ip `${ip_adress}` is obtained from ec2 meta information (timeout:3s). If it fails, hostname is used.
+The `{ip_adress}` is obtained from ec2 meta information (timeout:3s). If it fails, hostname is used.
 
 ## Requirements
 
@@ -19,13 +19,11 @@ The ip `${ip_adress}` is obtained from ec2 meta information (timeout:3s). If it 
 
 2. Install.
 
-    This is a simply hard linking to `/usr/local/bin/poros3`.
-
-    > If you don't like the path, you can do this manually through `ln ...`
-
     ```bash
     $ ./install.sh
     ```
+
+    > This is a simply hard linking to `/usr/local/bin/poros3`. So if you don't like the path, you can do this manually through `ln ...`
 
 ## Example
 
