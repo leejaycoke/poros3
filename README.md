@@ -1,12 +1,12 @@
-## postrotate_s3
+## poros3
 
 Upload log file after postrotate in logrotate.
 
-This script upload log file to s3 which `s3://{bucket}/{servic}/${module}/${date:yyyyMM}/${ip_adress}/filename`
+This script upload log file to s3.
 
-The ip ${ip_adress} is obtained from ec2 meta information with (timeout:3s)
+> S3 full path: `s3://{bucket}/{servic}/${module}/${date:yyyyMM}/${ip_adress}/filename`
 
-If it fails, hostname is used.
+The ip `${ip_adress}` is obtained from ec2 meta information (timeout:3s). If it fails, hostname is used.
 
 ## Requirements
 
@@ -15,19 +15,22 @@ If it fails, hostname is used.
 
 ## Installation
 
-This is a simply hard linking to `/usr/local/bin/postrotate_s3`.
+1. Clone this repository.
 
-> If you don't like the path, you can do this manually through `ln ...`
+2. Install.
 
-```bash
-$ ./install.sh
-```
+    This is a simply hard linking to `/usr/local/bin/poros3`.
+
+    > If you don't like the path, you can do this manually through `ln ...`
+
+    ```bash
+    $ ./install.sh
+    ```
 
 ## Example
 
-### example 1.
-```
-$ postrotate_s3 --bucket mywebservice-logs \
+```bash
+$ poros3 --bucket mywebservice-logs \
     --service admin \
     --module nginx \
     --date YESTERDAY \
@@ -36,11 +39,13 @@ $ postrotate_s3 --bucket mywebservice-logs \
 
 
 ```bash
-$ postrotate_s3 --help
+$ poros3 --help
+```
 
-## Help
+### Help
 
-Usage: postrotate_s3 [options...] [--bucket S3_BUCKET] <file>
+```
+Usage: poros3 [options...] [--bucket S3_BUCKET] <file>
 
 -b, --bucket    s3 bucket name
 -s, --service   service name (api, admin, web ...)

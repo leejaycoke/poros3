@@ -8,12 +8,8 @@ if [ ! -d "$LINK_PATH" ]; then
 fi
 
 BASEDIR=$(dirname "$0")
+ln -f $BASEDIR/poros3 $LINK_PATH/poros3
 
-sh_path=$(which postrotate_s3)
-if [ ! -z "$sh_path" ]; then
-    ln -f $BASEDIR/postrotate_s3 $LINK_PATH/postrotate_s3
-fi
+echo -e "Installation completed: $LINK_PATH/poros3\n"
 
-echo -e "Installation completed: $LINK_PATH/postrotate_s3\n"
-
-postrotate_s3 --help
+poros3 --help

@@ -20,7 +20,7 @@ USAGE
 
 function version()
 {
-    echo "postrotate_s3: v${VERSION}"
+    echo "poros3: v${VERSION}"
 }
 
 POSITIONAL=()
