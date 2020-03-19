@@ -1,0 +1,110 @@
+#!/bin/bash
+
+VERSION="0.0.1";
+
+function usage()
+{
+   cat << USAGE
+Usage: $(basename $0) [options...] [--bucket S3_BUCKET] <file>
+
+-b, --bucket    s3 bucket name
+-s, --service   service name (api, admin, web ...)
+-m, --module    module name (nginx, syslog, apache2 ...)
+-d, --date      (TODAY or YESTERDAY) default: TODAY
+
+optional arguments:
+    -v, --version   show version
+    -h, --help      show this help message and exit
+USAGE
+}
+
+function version()
+{
+    echo "postrotate_s3: v${VERSION}"
+}
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -b|--bucket)
+    BUCKET="$2"
+    shift
+    shift
+    ;;
+    -s|--service)
+    SERVICE="$2"
+    shift
+    shift
+    ;;
+    -m|--module)
+    MODULE="$2"
+    shift
+    shift
+    ;;
+    -d|--date)
+    DATE="$2"
+    shift
+    shift
+    ;;
+    -v|--version)
+    version
+    exit 0
+    shift
+    shift
+    ;;
+    -h|--help)
+    usage
+    exit 0
+    shift
+    shift
+    ;;
+    *)
+    POSITIONAL+=("$1")
+    shift
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}"
+
+
+UPLOAD_PATH="s3:/"
+
+# bucket
+if [ -z "$BUCKET" ]; then echo "Please input S3 bucket name with '--bucket name'" >&2; exit 1; fi
+UPLOAD_PATH=$UPLOAD_PATH/$BUCKET
+
+# service
+if [ ! -z "$SERVICE" ]; then UPLOAD_PATH=$UPLOAD_PATH/$SERVICE; fi
+
+# module
+if [ ! -z "$MODULE" ]; then UPLOAD_PATH=$UPLOAD_PATH/$MODULE; fi
+
+# date
+if [[ -z "$DATE" || "$DATE" = "TODAY" ]]; then
+    UPLOAD_PATH=$UPLOAD_PATH/`date +%Y%m`
+elif [ "$DATE" = "YESTERDAY" ]; then
+    UPLOAD_PATH=$UPLOAD_PATH/`date +%Y%m -d "1 day ago"`
+else
+    echo "Wrong date only 'TODAY' or 'YESTERDAY'" >&2
+    exit 1  
+fi
+
+# device
+IP=`curl -m 3 --silent http://169.254.169.254/latest/meta-data/public-ipv4`
+if [ -z "$IP" ]; then 
+    UPLOAD_PATH=$UPLOAD_PATH/$(echo `hostname` | sed 's/\./\-/g')/
+else
+    UPLOAD_PATH=$UPLOAD_PATH/$(echo $IP | sed 's/\./\-/g')/
+fi
+
+# file
+FILE="${BASH_ARGV[0]}"
+if [ ! -f $FILE ]; then echo "Not exists or it is not regular file: $FILE" >&2; exit 1; fi
+RAW_NAME=$(basename $FILE)
+
+echo "Upload to $UPLOAD_PATH/$RAW_NAME"
+
+aws s3 cp $FILE $UPLOAD_PATH
